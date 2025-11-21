@@ -25,3 +25,203 @@ btnToggle.addEventListener("click", () => {
     btnToggle.textContent = "🌙";
   }
 });
+
+
+document.addEventListener("keydown", (e) => {
+  const modal = document.getElementById("modal-tarea");
+
+  if (e.key === "Escape" && modal.classList.contains("show")) {
+    modal.classList.remove("show");
+  }
+});
+
+function activarConTeclado(elemento, callback){
+  elemento.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      callback();
+    }
+  });
+}
+
+
+
+
+/* ============================
+   VARIABLES Y ELEMENTOS
+============================ */
+const btnAgregar = document.getElementById("btn-agregar-tarea");
+const modal = document.getElementById("modal-tarea");
+const btnCerrarModal = document.getElementById("btn-cerrar-modal");
+const btnCancelar = document.getElementById("btn-cancelar");
+const listaTareas = document.getElementById("lista-tareas");
+
+const inputTitulo = document.getElementById("titulo-tarea");
+const inputDescripcion = document.getElementById("descripcion-tarea");
+const inputPrioridad = document.getElementById("prioridad-tarea");
+const inputFecha = document.getElementById("fecha-limite");
+
+const tareasCompletadasUI = document.getElementById("tareas-completadas");
+
+/* Filtros */
+const botonesFiltro = document.querySelectorAll(".filtros-tareas button");
+
+
+
+/* Array de tareas (almacenado en localStorage) */
+let tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+
+/* ============================
+   MOSTRAR / OCULTAR MODAL
+============================ */
+btnAgregar.addEventListener("click", () => {
+  modal.classList.add("show");
+  inputTitulo.focus();
+});
+
+btnCerrarModal.addEventListener("click", cerrarModal);
+btnCancelar.addEventListener("click", cerrarModal);
+
+function cerrarModal() {
+  modal.classList.remove("show");
+  limpiarFormulario();
+}
+
+/* ============================
+   LIMPIAR FORMULARIO
+============================ */
+function limpiarFormulario() {
+  inputTitulo.value = "";
+  inputDescripcion.value = "";
+  inputPrioridad.value = "media";
+  inputFecha.value = "";
+}
+
+/* ============================
+   CREAR TAREA
+============================ */
+document.querySelector(".formulario-tarea")
+        .addEventListener("submit", agregarTarea);
+
+ function agregarTarea(e) {
+    e.preventDefault();
+
+    const nuevaTarea = {
+        id: Date.now(),
+        titulo: inputTitulo.value.trim(),
+        descripcion: inputDescripcion.value.trim(),
+        prioridad: inputPrioridad.value,
+        fechaLimite: inputFecha.value || null,
+        completada: false
+    };
+
+    // Evita tareas vacías o duplicadas por error
+    if (!nuevaTarea.titulo) return;
+
+    tareas.push(nuevaTarea);
+    guardarTareas();
+    renderTareas();
+    cerrarModal();
+}
+
+
+
+/* ============================
+   GUARDAR EN LOCALSTORAGE
+============================ */
+function guardarTareas() {
+  localStorage.setItem("tareas", JSON.stringify(tareas));
+}
+
+/* ============================
+   FILTROS
+============================ */
+let filtroActual = "todas";
+
+botonesFiltro.forEach(btn => {
+  btn.addEventListener("click", () => {
+    botonesFiltro.forEach(b => b.classList.remove("filtro-activo"));
+    btn.classList.add("filtro-activo");
+    filtroActual = btn.dataset.filtro;
+    renderTareas();
+  });
+});
+
+/* ============================
+   RENDERIZAR TAREAS
+============================ */
+function renderTareas() {
+  listaTareas.innerHTML = "";
+
+  let tareasFiltradas = tareas;
+
+  if (filtroActual === "pendientes") {
+    tareasFiltradas = tareas.filter(t => !t.completada);
+  } else if (filtroActual === "completadas") {
+    tareasFiltradas = tareas.filter(t => t.completada);
+  }
+
+  if (tareasFiltradas.length === 0) {
+    listaTareas.innerHTML = `
+      <div class="empty-state tarea">
+        <p>🎯 No hay tareas para mostrar.</p>
+      </div>`;
+    actualizarEstadisticas();
+    return;
+  }
+
+  tareasFiltradas.forEach(tarea => {
+    const div = document.createElement("div");
+    div.className = "tarea";
+    div.innerHTML = `
+      <div class="info">
+        <input type="checkbox" ${tarea.completada ? "checked" : ""} data-id="${tarea.id}">
+        
+        <div>
+          <div class="titulo">${tarea.titulo}</div>
+          <div class="meta">
+            ${tarea.fechaLimite ? `📅 ${tarea.fechaLimite}` : ""}
+          </div>
+        </div>
+      </div>
+
+      <span class="tag-prioridad tag-${tarea.prioridad}">
+        ${tarea.prioridad}
+      </span>
+    `;
+
+    // Listener marcar completada
+    div.querySelector("input[type=checkbox]").addEventListener("change", (e) => {
+      marcarCompletada(tarea.id, e.target.checked);
+    });
+
+    listaTareas.appendChild(div);
+  });
+
+  actualizarEstadisticas();
+}
+
+/* ============================
+   MARCAR COMO COMPLETADA
+============================ */
+function marcarCompletada(id, estado) {
+  const tarea = tareas.find(t => t.id === id);
+  if (tarea) tarea.completada = estado;
+
+  guardarTareas();
+  renderTareas();
+}
+
+/* ============================
+   ESTADÍSTICAS
+============================ */
+function actualizarEstadisticas() {
+  const completadas = tareas.filter(t => t.completada).length;
+  tareasCompletadasUI.textContent = completadas;
+}
+
+
+/* ============================
+   INICIALIZACIÓN
+============================ */
+renderTareas();
