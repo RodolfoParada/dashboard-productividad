@@ -225,3 +225,124 @@ function actualizarEstadisticas() {
    INICIALIZACIÓN
 ============================ */
 renderTareas();
+
+
+
+
+
+/* ==========================================
+   ⏱️ TEMPORIZADOR POMODORO
+========================================== */
+
+// Elementos del DOM
+const tiempoRestanteEl = document.getElementById("tiempo-restante");
+const btnIniciar = document.getElementById("btn-iniciar");
+const btnPausar = document.getElementById("btn-pausar");
+const btnReiniciar = document.getElementById("btn-reiniciar");
+const botonesModo = document.querySelectorAll(".modo-temporizador button");
+const sesionesHoyEl = document.getElementById("sesiones-hoy");
+
+// Valores del temporizador
+let tiempoTrabajo = 25 * 60;
+let tiempoDescanso = 5 * 60;
+
+let tiempoRestante = tiempoTrabajo; // por defecto
+let temporizadorActivo = null;
+let modoActual = "trabajo"; // trabajo | descanso
+let sesionesCompletadas = 0;
+
+// Formatear mm:ss
+function formatearTiempo(segundos) {
+  let min = Math.floor(segundos / 60);
+  let sec = segundos % 60;
+  return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
+}
+
+// Actualiza el temporizador en pantalla
+function actualizarPantalla() {
+  tiempoRestanteEl.textContent = formatearTiempo(tiempoRestante);
+}
+
+// Cambiar modo
+function cambiarModo(modo) {
+  modoActual = modo;
+
+  botonesModo.forEach(btn =>
+    btn.classList.toggle("modo-activo", btn.dataset.modo === modo)
+  );
+
+  if (modo === "trabajo") {
+    tiempoRestante = tiempoTrabajo;
+  } else {
+    tiempoRestante = tiempoDescanso;
+  }
+
+  detenerTemporizador();
+  actualizarPantalla();
+}
+
+// Iniciar temporizador
+function iniciarTemporizador() {
+  if (temporizadorActivo) return;
+
+  temporizadorActivo = setInterval(() => {
+    tiempoRestante--;
+
+    actualizarPantalla();
+
+    if (tiempoRestante <= 0) {
+      clearInterval(temporizadorActivo);
+      temporizadorActivo = null;
+
+      // Cambiar de modo automáticamente
+      if (modoActual === "trabajo") {
+        sesionesCompletadas++;
+        sesionesHoyEl.textContent = sesionesCompletadas;
+        cambiarModo("descanso");
+      } else {
+        cambiarModo("trabajo");
+      }
+    }
+  }, 1000);
+
+  btnIniciar.disabled = true;
+  btnPausar.disabled = false;
+}
+
+// Pausar
+function pausarTemporizador() {
+  detenerTemporizador();
+}
+
+// Detener interval
+function detenerTemporizador() {
+  if (temporizadorActivo) {
+    clearInterval(temporizadorActivo);
+    temporizadorActivo = null;
+  }
+  btnIniciar.disabled = false;
+  btnPausar.disabled = true;
+}
+
+// Reiniciar
+function reiniciarTemporizador() {
+  detenerTemporizador();
+
+  tiempoRestante = modoActual === "trabajo" ? tiempoTrabajo : tiempoDescanso;
+
+  actualizarPantalla();
+}
+
+// Eventos
+btnIniciar.addEventListener("click", iniciarTemporizador);
+btnPausar.addEventListener("click", pausarTemporizador);
+btnReiniciar.addEventListener("click", reiniciarTemporizador);
+
+botonesModo.forEach(btn => {
+  btn.addEventListener("click", () => {
+    cambiarModo(btn.dataset.modo);
+  });
+});
+
+// Estado inicial
+actualizarPantalla();
