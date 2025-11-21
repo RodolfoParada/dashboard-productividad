@@ -444,3 +444,138 @@ body{
 a,button,input,select,textarea{ font-family:inherit; }
 
 
+/* ==========================================
+   📱 RESPONSIVE GENERAL
+========================================== */
+
+/* --------- TABLET --------- */
+@media (max-width: 1024px) {
+
+  .grid-principal {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .estadisticas .grid-estadisticas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .panel-tareas,
+  .panel-pomodoro {
+    width: 100%;
+  }
+
+  .circulo-temporizador {
+    width: 200px;
+    height: 200px;
+  }
+
+}
+
+/* --------- MÓVILES GRANDES --------- */
+@media (max-width: 768px) {
+
+  .header-principal h1 {
+    font-size: 1.6rem;
+    text-align: center;
+  }
+
+  .contenedor-header {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .estadisticas .grid-estadisticas {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .filtros-tareas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .lista-tareas {
+    padding: 0.5rem;
+  }
+
+  .tarea {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .circulo-temporizador {
+    width: 180px;
+    height: 180px;
+  }
+
+  .controles-temporizador {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .modo-temporizador {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .progreso-semanal .grafico-semanal {
+    gap: 0.3rem;
+  }
+
+}
+
+/* --------- MÓVILES PEQUEÑOS --------- */
+@media (max-width: 480px) {
+
+  .header-principal h1 {
+    font-size: 1.2rem;
+  }
+
+  .panel-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .tarjeta-estadistica h3 {
+    font-size: 0.9rem;
+  }
+
+  .numero-estadistica {
+    font-size: 1.3rem;
+  }
+
+  .circulo-temporizador {
+    width: 150px;
+    height: 150px;
+  }
+
+  .tiempo-restante {
+    font-size: 1.7rem;
+  }
+
+  .barra-dia .barra-progreso {
+    width: 18px;
+  }
+
+  .grafico-semanal {
+    gap: 0.2rem;
+  }
+
+  /* Modal responsive */
+  .modal-contenido {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .acciones-modal {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+}
