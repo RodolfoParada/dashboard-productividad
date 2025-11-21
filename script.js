@@ -346,3 +346,103 @@ botonesModo.forEach(btn => {
 
 // Estado inicial
 actualizarPantalla();
+
+
+
+// Guarda una clave y valor en localStorage
+function saveLocal(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+// Obtiene un valor desde localStorage
+function loadLocal(key, defaultValue = null) {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : defaultValue;
+}
+
+// =============================
+// 1) Persistir FECHA seleccionada
+// =============================
+function persistSelectedDate(date) {
+    saveLocal("selectedDate", date);
+}
+
+function restoreSelectedDate() {
+    const savedDate = loadLocal("selectedDate");
+    if (savedDate) {
+        dateInput.value = savedDate;
+        updateWeekDisplay(savedDate);
+    }
+}
+
+// =============================
+// 2) Persistir SEMANA actual
+// =============================
+function persistWeek(startDate) {
+    saveLocal("currentWeekStart", startDate);
+}
+
+function restoreWeek() {
+    const savedWeek = loadLocal("currentWeekStart");
+    if (savedWeek) {
+        updateWeekDisplay(savedWeek);
+    }
+}
+
+// =============================
+// 3) Persistir FORMULARIOS
+// =============================
+function persistForm(idForm) {
+    const form = document.getElementById(idForm);
+    const data = {};
+
+    [...form.elements].forEach(el => {
+        if (el.name) data[el.name] = el.value;
+    });
+
+    saveLocal("form_" + idForm, data);
+}
+
+function restoreForm(idForm) {
+    const form = document.getElementById(idForm);
+    const data = loadLocal("form_" + idForm);
+
+    if (!data) return;
+
+    [...form.elements].forEach(el => {
+        if (el.name && data[el.name]) {
+            el.value = data[el.name];
+        }
+    });
+}
+
+// =============================
+// 4) Persistencia automática
+// =============================
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Restaurar fecha
+    restoreSelectedDate();
+
+    // Restaurar semana
+    restoreWeek();
+
+    // Restaurar TODOS los formularios que quieras
+    restoreForm("formVisita");
+    restoreForm("formPaciente");
+    restoreForm("formMedico");
+
+});
+
+// Ejemplo: cuando el usuario cambia fecha
+dateInput.addEventListener("change", () => {
+    persistSelectedDate(dateInput.value);
+    persistWeek(dateInput.value);
+});
+
+// Ejemplo: guardar formularios automáticamente
+document.querySelectorAll("form").forEach(form => {
+    form.addEventListener("input", () => {
+        persistForm(form.id);
+    });
+});
